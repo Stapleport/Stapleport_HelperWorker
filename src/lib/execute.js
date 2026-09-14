@@ -39,7 +39,7 @@ const clients = (cfg, account) => {
 
 // swap 路由（pay_config.router 是唯一事实）+ wnative；isolate 全局缓存 5 分钟
 async function swapRoute(publicClient, cfg) {
-  const key = `sweeppay-route-${cfg.idStr}`;
+  const key = `stapleport-route-${cfg.idStr}`;
   const hit = globalThis[key];
   if (hit && Date.now() - hit.at < 300_000) return hit.v;
   const router = (
@@ -116,7 +116,12 @@ const gasVerdict = async (publicClient, request, route, token, totalReward, buff
   }
   const gasPrice = await publicClient.getGasPrice();
   const quote = await quoteNativeOut(publicClient, route, token, totalReward);
-  return { gas, gasPrice, quote, verdict: evaluateProfit(quote, gas, gasPrice, bufferX10) };
+  return {
+    gas,
+    gasPrice,
+    quote,
+    verdict: evaluateProfit({ expectedNative: quote, gasUnits: gas, gasPrice, bufferX10 }),
+  };
 };
 
 // ---- 单笔 ----
@@ -162,7 +167,7 @@ export async function settleSingle({
       abi: ABIS.ImputePay,
       functionName: 'execute',
       args: [intent, intentSig, permitSig, minNativeOut],
-      gas,
+      gas: (gas * 120n) / 100n, // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值）
       account,
     });
     return { txHash, gas, quote, minNativeOut, verdict };
@@ -235,7 +240,7 @@ export async function settleBatch({
         items.map((it) => it.permitSig ?? '0x'),
         minNativeOuts,
       ],
-      gas,
+      gas: (gas * 120n) / 100n, // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值）
       account,
     });
     return { txHash, gas, totalQuote, minNativeOuts, verdict };

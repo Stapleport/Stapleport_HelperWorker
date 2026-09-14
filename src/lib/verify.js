@@ -1,6 +1,6 @@
 // 意图校验 + EIP-712 验签。与付端 dapp 的 src/core/imputepay.js 同口径，
 // 规格唯一来源：总库 plans/pay-m1-spec.md（schema v2 七字段）。
-import { isAddress, verifyTypedData, hashTypedData, recoverTypedDataAddress } from 'viem';
+import { isAddress, verifyTypedData, hashTypedData, recoverTypedDataAddress, keccak256, encodeAbiParameters } from 'viem';
 
 export const INTENT_TYPES = {
   Intent: [
@@ -87,14 +87,18 @@ export function recoverPayer(cfg, intent, intentSig) {
   });
 }
 
-// intentHash（事件口径的 struct hash）：可离线复现，队列去重/回执对账都用它
+// intentHash（事件口径的 struct hash，规格 §1.2/§3）：keccak(abi.encode(INTENT_TYPEHASH,
+// 七字段))——注意不是 EIP-712 digest；链上 PaymentExecuted 事件带的就是它，回执对账主键
 export function intentHashOf(cfg, intent) {
-  return hashTypedData({
-    domain: imputePayDomain(cfg.chainId, cfg.imputepay),
-    types: INTENT_TYPES,
-    primaryType: 'Intent',
-    message: intentMessage(intent),
-  });
+  const typehash = keccak256(
+    'Intent(address payee,uint256 payeeAmount,address token,uint256 maxHelperReward,uint256 chainId,uint256 nonce,uint256 deadline)',
+  );
+  return keccak256(
+    encodeAbiParameters(
+      [{ type: 'bytes32' }, { type: 'address' }, { type: 'uint256' }, { type: 'address' }, { type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }],
+      [typehash, intent.payee, intent.payeeAmount, intent.token, intent.maxHelperReward, intent.chainId, intent.nonce, intent.deadline],
+    ),
+  );
 }
 
 export { verifyTypedData };

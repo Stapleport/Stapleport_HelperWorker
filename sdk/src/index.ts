@@ -1,4 +1,4 @@
-// @sweeppay/pay-sdk：付端接入的最小完整闭环。
+// @stapleport/pay-sdk：付端接入的最小完整闭环。
 // 机器侧四步：buildIntent → signPermit + signIntent（双签名，签完即可下线）→
 // submitToHelper（任何 helper 都行，本仓的 HelperWorker 是参考实现）→ waitForExecution。
 // 口径唯一来源：总库 plans/pay-m1-spec.md；与合约 EIP712Upgradeable("ImputePay","1") 逐字一致。
@@ -9,7 +9,9 @@ import {
   type Log,
   createPublicClient,
   http,
-  hashTypedData,
+  keccak256,
+  toHex,
+  encodeAbiParameters,
   parseAbiItem,
 } from 'viem';
 import type { PrivateKeyAccount } from 'viem/accounts';
@@ -77,14 +79,21 @@ export function buildIntent(
   };
 }
 
-/** intentHash（struct hash，事件口径）：可离线复现，对账用 */
+/** intentHash（事件口径 struct hash，规格 §1.2/§3）：keccak(abi.encode(TYPEHASH, 七字段))。
+ *  注意不是 EIP-712 digest——链上 PaymentExecuted 事件带的、waitForExecution 对账用的都是它。 */
 export function intentHash(cfg: ImputePayRef, intent: Intent): Hash {
-  return hashTypedData({
-    domain: imputePayDomain(cfg.chainId, cfg.imputepay),
-    types: INTENT_TYPES,
-    primaryType: 'Intent',
-    message: { ...intent },
-  });
+  const typehash = keccak256(
+    toHex('Intent(address payee,uint256 payeeAmount,address token,uint256 maxHelperReward,uint256 chainId,uint256 nonce,uint256 deadline)'),
+  );
+  return keccak256(
+    encodeAbiParameters(
+      [
+        { type: 'bytes32' }, { type: 'address' }, { type: 'uint256' }, { type: 'address' },
+        { type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' }, { type: 'uint256' },
+      ],
+      [typehash, intent.payee, intent.payeeAmount, intent.token, intent.maxHelperReward, intent.chainId, intent.nonce, intent.deadline],
+    ),
+  );
 }
 
 // ---- 双签名 ----

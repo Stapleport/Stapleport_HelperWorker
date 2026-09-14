@@ -1,10 +1,10 @@
-# @sweeppay/pay-sdk
+# @stapleport/pay-sdk
 
-SweepPay 付端 TS SDK：把「机器付款」压成四行调用。与 HelperWorker 同仓同源（计划 M5）。
+Stapleport 付端 TS SDK：把「机器付款」压成四行调用。与 HelperWorker 同仓同源（计划 M5）。
 
 ```ts
 import { privateKeyToAccount } from 'viem/accounts';
-import { buildIntent, signIntent, signPermit, serializeIntent, submitToHelper, waitForExecution } from '@sweeppay/pay-sdk';
+import { buildIntent, signIntent, signPermit, serializeIntent, submitToHelper, waitForExecution } from '@stapleport/pay-sdk';
 
 const machine = privateKeyToAccount(MACHINE_KEY);          // 付方（签完即可下线）
 const cfg = { chainId: 7156777n, imputepay: '0xA36D…', rpcUrl: 'https://rpc.egoistmusic.top' };

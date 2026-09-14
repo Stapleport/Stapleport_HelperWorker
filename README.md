@@ -1,6 +1,6 @@
-# SweepPay HelperWorker
+# Stapleport HelperWorker
 
-付端**第三方 helper** 的参考实现：把 [ImputePay](../../SweepPay_hardhat) 的「机器签名意图 → 任何人可代提交」跑成一个无人值守服务。机器签完名即可下线，本 Worker 盯端口收单，替它把意图送上链。
+付端**第三方 helper** 的参考实现：把 [ImputePay](../../Stapleport_hardhat) 的「机器签名意图 → 任何人可代提交」跑成一个无人值守服务。机器签完名即可下线，本 Worker 盯端口收单，替它把意图送上链。
 
 ```
 机器（付方）                         HelperWorker（本仓）                    链
@@ -37,6 +37,13 @@ wrangler secret put HELPER_PRIVATE_KEY
 
 ```bash
 echo 'HELPER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' > .dev.vars
+```
+
+**本地 E2E 演示**（hardhat 本地链 + wrangler dev + SDK 造单，单笔 + 批量全链路对账）：
+前置步骤与地址配置见 [`localtest/demo_e2e.mjs`](./localtest/demo_e2e.mjs) 头注释；worker 起来后：
+
+```bash
+node localtest/demo_e2e.mjs   # 造单 → helper 预检/执行 → 链上对账
 ```
 
 ## 部署
@@ -112,6 +119,6 @@ L1 偏移链（Base 等）把 L1 data fee 分量计入 gasPrice 口径后公式�
 
 ## sdk/
 
-[`sdk/`](./sdk/README.md) 是同仓的 TS SDK（`@sweeppay/pay-sdk`，M5 交付物）：`buildIntent → signPermit + signIntent → submitToHelper → waitForExecution` 四步接入，与前端 Playground、hardhat 测试同一套口径。
+[`sdk/`](./sdk/README.md) 是同仓的 TS SDK（`@stapleport/pay-sdk`，M5 交付物）：`buildIntent → signPermit + signIntent → submitToHelper → waitForExecution` 四步接入，与前端 Playground、hardhat 测试同一套口径。
 
 规格唯一来源：总库 `plans/pay-m1-spec.md`。

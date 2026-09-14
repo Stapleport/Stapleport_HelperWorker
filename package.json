@@ -1,9 +1,9 @@
 {
-  "name": "sweeppay-helper-worker",
+  "name": "stapleport-helper-worker",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "SweepPay 付端第三方 helper Worker：暴露 /intents 端口接收机器签名意图，模拟→盈利预检→代提交 execute/executeBatch；绑 KV 后低利单进队列由 cron 周期重试。零后端依赖（仅 viem）。",
+  "description": "Stapleport 付端第三方 helper Worker：暴露 /intents 端口接收机器签名意图，模拟→盈利预检→代提交 execute/executeBatch；绑 KV 后低利单进队列由 cron 周期重试。零后端依赖（仅 viem）。",
   "scripts": {
     "dev": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",

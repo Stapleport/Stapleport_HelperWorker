@@ -29,8 +29,8 @@ const NAMES = ['ImputePay', 'Test_usdt', 'PancakeRouter', 'WBNB'];
 export function allJsonPath() {
   return (
     process.env.HARDHAT_ALL_JSON ??
-    // 本仓在 SweepPay/web/<板块>/<仓>/scripts 下：向上四级 = SweepPay 总库根
-    join(here, '..', '..', '..', '..', 'SweepPay_hardhat', 'deployments', 'all.json')
+    // 本仓在 Stapleport/web/<板块>/<仓>/scripts 下：向上四级 = Stapleport 总库根
+    join(here, '..', '..', '..', '..', 'Stapleport_hardhat', 'deployments', 'all.json')
   );
 }
 

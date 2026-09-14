@@ -12,8 +12,9 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
+// 应答里带链上数值（gas/quote/verdict 等），BigInt 统一字符串化
 const json = (data, status = 200) =>
-  new Response(JSON.stringify(data, null, 2) + '\n', {
+  new Response(JSON.stringify(data, (_, v) => (typeof v === 'bigint' ? v.toString() : v), null, 2) + '\n', {
     status,
     headers: { 'content-type': 'application/json; charset=utf-8', ...CORS },
   });
