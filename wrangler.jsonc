@@ -1,0 +1,44 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sweeppay-helper",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-08-01",
+
+  // 公网面就是业务本身：机器 POST 签名意图进来（与收端 Executor 的零公网面相反，
+  // 这个 Worker 的存在意义就是「暴露端口」——无许可 helper 的代提交入口）。
+  // 可选防滥用：设 HELPER_TOKEN 后要求 Authorization: Bearer <token>。
+
+  // cron 只服务重试队列：没绑 KV 时队列恒空，每分钟空转一次成本可忽略
+  "triggers": {
+    "crons": ["*/1 * * * *"]
+  },
+
+  "vars": {
+    // ---- 链与合约（逗号分隔 chainId；默认读 registry.json 全部链，
+    //      rpc/imputepay 可用 RPC_URL_<id> / IMPUTEPAY_<id> 覆盖）----
+    "CHAIN_IDS": "7156777,31337",
+
+    // ---- 盈利预检 ----
+    // 奖励折算（router 行情价）≥ gas 成本 × buffer 才出手；×1.2 = 12/10
+    "GAS_BUFFER_X10": "12",
+    // minNativeOut = 行情折算 × bps/10000（防三明治；合约 withgas 是最终兜底）
+    "MIN_OUT_BPS": "9500",
+    // 单次 executeBatch 最多几笔（同币种聚合换币，gas 摊薄）
+    "MAX_BATCH": "10",
+
+    // ---- 行为 ----
+    // true = 只模拟与预检，不广播（本地联调/巡检用）
+    "DRY_RUN": "false",
+    // 可选：设置后所有 POST 需带 Authorization: Bearer <token>（防端口被扫）
+    "HELPER_TOKEN": "",
+    // 重试队列最多重试几次后放弃（需绑定下面的 KV 才有队列）
+    "QUEUE_MAX_ATTEMPTS": "5"
+  }
+
+  // ---- 可选：重试队列 KV（不绑 = 纯无状态，暂不可利单直接 422 拒绝）----
+  // 绑定后：盈利预检不过的单子 202 暂存，cron 每分钟重估行情，有利可图立即代提交。
+  // `wrangler kv namespace create INTENT_QUEUE` 把返回的 id 填进来再 deploy：
+  // "kv_namespaces": [
+  //   { "binding": "INTENT_QUEUE", "id": "<wrangler kv namespace create INTENT_QUEUE 返回的 id>" }
+  // ]
+}
