@@ -1,6 +1,6 @@
 # Stapleport HelperWorker
 
-付端**第三方 helper** 的参考实现：把 [ImputePay](../../Stapleport_hardhat) 的「机器签名意图 → 任何人可代提交」跑成一个无人值守服务。机器签完名即可下线，本 Worker 盯端口收单，替它把意图送上链。
+付端**第三方 helper** 的参考实现：把 [ImputePay](../Stapleport_hardhat) 的「机器签名意图 → 任何人可代提交」跑成一个无人值守服务。机器签完名即可下线，本 Worker 盯端口收单，替它把意图送上链。
 
 ```
 机器（付方）                         HelperWorker（本仓）                    链
