@@ -56,7 +56,7 @@ test('intentHash 与字段顺序无关（具名消息构造）', async () => {
 
 test('形状校验：reward 禁 0 / chainId 错配 / 坏地址 / 非整数', () => {
   assert.match(normalizeIntent({ ...rawIntent(), maxHelperReward: '0' }).error, /maxHelperReward/);
-  assert.match(normalizeIntent(rawIntent(), { chainId: 7156777n }).error, /chainId 错配/);
+  assert.match(normalizeIntent(rawIntent(), { chainId: 78753n }).error, /chainId 错配/);
   assert.match(normalizeIntent({ ...rawIntent(), payee: '0xdead' }).error, /地址非法/);
   assert.match(normalizeIntent({ ...rawIntent(), payeeAmount: '1.5' }).error, /非负整数/);
   assert.match(normalizeIntent(null).error, /对象/);

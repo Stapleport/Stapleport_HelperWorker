@@ -63,9 +63,9 @@ wrangler secret put HELPER_TOKEN            # 设置后所有 POST 需 Bearer
 ```jsonc
 // 请求（bigint 一律字符串）
 {
-  "chainId": "7156777",
+  "chainId": "78753",
   "intent": { "payee": "0x…", "payeeAmount": "1000000", "token": "0x…",
-              "maxHelperReward": "10000", "chainId": "7156777",
+              "maxHelperReward": "10000", "chainId": "78753",
               "nonce": "1726180000", "deadline": "1726183600" },
   "intentSig": "0x…",   // EIP-712（域 ImputePay/1）
   "permitSig": "0x…"    // EIP-2612；可省（allowance 足够时合约走 fallback）

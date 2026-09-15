@@ -7,7 +7,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { buildIntent, signIntent, signPermit, serializeIntent, submitToHelper, waitForExecution } from '@stapleport/pay-sdk';
 
 const machine = privateKeyToAccount(MACHINE_KEY);          // 付方（签完即可下线）
-const cfg = { chainId: 7156777n, imputepay: '0xA36D…', rpcUrl: 'https://rpc.egoistmusic.top' };
+const cfg = { chainId: 78753n, imputepay: '0xA36D…', rpcUrl: 'https://rpc.stapleport.com' };
 
 // 1) 意图：收款方、应收、结算代币、helper 酬劳上限（含费透明收据，签进签名里）
 const intent = buildIntent(
@@ -20,8 +20,8 @@ const { permitSig } = await signPermit(machine, { ...cfg, token: USDC, tokenName
 const intentSig = await signIntent(machine, cfg, intent);
 
 // 3) 交给任何 helper 代提交（本仓 HelperWorker 是参考实现；无许可 = 换谁都行）
-const ack = await submitToHelper('https://sweeppay-helper.<你的子域>.workers.dev', {
-  chainId: '7156777', intent: serializeIntent(intent), intentSig, permitSig,
+const ack = await submitToHelper('https://stapleport-helper.<你的子域>.workers.dev', {
+  chainId: '78753', intent: serializeIntent(intent), intentSig, permitSig,
 });
 
 // 4) 等链上 PaymentExecuted 回执（含费透明收据：实付/酬劳/gas 全在事件里）

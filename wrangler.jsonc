@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "sweeppay-helper",
+  "name": "stapleport-helper",
   "main": "src/worker.js",
   "compatibility_date": "2026-08-01",
 
@@ -16,7 +16,7 @@
   "vars": {
     // ---- 链与合约（逗号分隔 chainId；默认读 registry.json 全部链，
     //      rpc/imputepay 可用 RPC_URL_<id> / IMPUTEPAY_<id> 覆盖）----
-    "CHAIN_IDS": "7156777,31337",
+    "CHAIN_IDS": "78753,31337",
 
     // ---- 盈利预检 ----
     // 奖励折算（router 行情价）≥ gas 成本 × buffer 才出手；×1.2 = 12/10
