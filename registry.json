@@ -49,31 +49,6 @@
           "anonymous": false,
           "inputs": [
             {
-              "indexed": true,
-              "internalType": "bytes32",
-              "name": "intentHash",
-              "type": "bytes32"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "recipient",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "feeAmount",
-              "type": "uint256"
-            }
-          ],
-          "name": "FeeCollected",
-          "type": "event"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
               "indexed": false,
               "internalType": "uint8",
               "name": "version",
@@ -384,19 +359,6 @@
           "name": "executeBatch",
           "outputs": [],
           "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "fee_bps",
-          "outputs": [
-            {
-              "internalType": "uint16",
-              "name": "",
-              "type": "uint16"
-            }
-          ],
-          "stateMutability": "view",
           "type": "function"
         },
         {
@@ -991,10 +953,10 @@
         "rpc": "http://127.0.0.1:8545",
         "explorer": null
       },
-      "ImputePay": "0xE9f0A55be481d72B2509c485faEC505cA5B454eB",
+      "ImputePay": "0x60FB019a3C221a4d691B418Df58150569f7D6Bc4",
       "Test_usdt": "0x0b42B142087FAFcac1a1C3B90a61F86da7B64835",
-      "PancakeRouter": "0xc37FEAc9bDC596937e915Dd46b5d4110839e5a5c",
-      "WBNB": "0x41268aef8F3C1F852Ef4563E6576910Cc638A2dd"
+      "PancakeRouter": "0xcA55bB5f2d8D78756C387f51E33814562850296e",
+      "WBNB": "0xdd73c460e7576Ac6538280Ea77AF133314f74b68"
     },
     "78753": {
       "meta": {
@@ -1002,7 +964,7 @@
         "rpc": "https://rpc.stapleport.com",
         "explorer": null
       },
-      "ImputePay": "0xECbB2c921B1C10301756ddf83C88f0eB07599013",
+      "ImputePay": "0x6a03cdce850E71dA95Da9B0Cd4884b69230467A7",
       "Test_usdt": "0x3c74E57fE97c2b8e36A989deDB80Ec32a52C4fD0"
     }
   }
