@@ -13,6 +13,8 @@
   │                                     │ （绑 KV 后）202 单 cron 重估行情  │
 ```
 
+> 上图「绑 KV 后」= 第三方自部署可选路径；Stapleport 自家生产零 KV（红线，CF KV 免费额度事故），不绑时暂不可利单直接 422 拒单。
+
 **无许可的含义**：helper 酬劳上限（`maxHelperReward`）由付方签进意图，任何能凑齐 gas 的人都可以提交同一份签名。本 Worker 只是「长得最勤快的那一个」——换掉它不改变协议任何性质。这也是它与 x402 facilitator（生态默认走官方托管结算服务）的本质区别。
 
 ## 快速开始
@@ -39,18 +41,18 @@ wrangler secret put HELPER_PRIVATE_KEY
 echo 'HELPER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' > .dev.vars
 ```
 
-**本地 E2E 演示**（hardhat 本地链 + wrangler dev + SDK 造单，单笔 + 批量全链路对账）：
-前置步骤与地址配置见 [`localtest/demo_e2e.mjs`](./localtest/demo_e2e.mjs) 头注释；worker 起来后：
+**本地 E2E 演示**（hardhat 本地链 + wrangler dev + Kit 造单，单笔全链路对账）：
+前置步骤与地址配置见 [`../Stapleport_Pay_kit/localtest/demo_e2e.mjs`](../Stapleport_Pay_kit/localtest/demo_e2e.mjs) 头注释；worker 起来后：
 
 ```bash
-node localtest/demo_e2e.mjs   # 造单 → helper 预检/执行 → 链上对账
+node ../Stapleport_Pay_kit/localtest/demo_e2e.mjs   # 造单 → helper 预检/执行 → 链上对账
 ```
 
 ## 部署
 
 ```bash
 npm run deploy
-# 可选绑定重试队列：
+# 可选绑定重试队列（⚠️ Stapleport 自家生产不绑——零 KV 红线/免费额度事故；此处为第三方自部署可选路径）：
 wrangler kv namespace create INTENT_QUEUE   # 把 id 填进 wrangler.jsonc 再 deploy
 # 可选防滥用：
 wrangler secret put HELPER_TOKEN            # 设置后所有 POST 需 Bearer
@@ -117,8 +119,8 @@ L1 偏移链（Base 等）把 L1 data fee 分量计入 gasPrice 口径后公式�
 - **不承诺成交**：出不出手由盈利预检说了算；deadline 内没人提交，意图自然作废。
 - **不解析业务**：Worker 不理解「订单」，只理解七字段意图。
 
-## sdk/
+## 协议口径正典（@stapleport/pay-kit）
 
-[`sdk/`](./sdk/README.md) 是同仓的 TS SDK（`@stapleport/pay-sdk`，M5 交付物）：`buildIntent → signPermit + signIntent → submitToHelper → waitForExecution` 四步接入，与前端 Playground、hardhat 测试同一套口径。
+意图口径（schema/双签/验签/提交/回执）的正典在 [`../Stapleport_Pay_kit`](../Stapleport_Pay_kit)（2026-09-16 收编原同仓 `sdk/` TS SDK 与本仓 verify 重写而来）：`buildIntent → signPermit + signIntent → submitToHelper → waitForExecution` 四步接入，与前端 Playground、hardhat 测试同一套口径。本仓 `src/lib/verify.js` 只是它的薄适配。
 
 规格唯一来源：总库 `plans/pay-m1-spec.md`。

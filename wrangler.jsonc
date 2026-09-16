@@ -35,6 +35,7 @@
     "QUEUE_MAX_ATTEMPTS": "5"
   }
 
+  // ⚠️ Stapleport 自家生产不绑（零 KV 红线，免费额度事故）；不绑时 422 拒单；此处为第三方自部署可选路径。
   // ---- 可选：重试队列 KV（不绑 = 纯无状态，暂不可利单直接 422 拒绝）----
   // 绑定后：盈利预检不过的单子 202 暂存，cron 每分钟重估行情，有利可图立即代提交。
   // `wrangler kv namespace create INTENT_QUEUE` 把返回的 id 填进来再 deploy：

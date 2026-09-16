@@ -949,14 +949,14 @@
   "chains": {
     "31337": {
       "meta": {
-        "name": "localhost",
+        "name": "dev",
         "rpc": "http://127.0.0.1:8545",
         "explorer": null
       },
-      "ImputePay": "0x60FB019a3C221a4d691B418Df58150569f7D6Bc4",
-      "Test_usdt": "0x44f8E63b00e89320f7619583502bF90597993F2F",
-      "PancakeRouter": "0x68ED9eCB7D66f5E35BC6e0325b14f75dc55B45b4",
-      "WBNB": "0x0b42B142087FAFcac1a1C3B90a61F86da7B64835"
+      "ImputePay": "0xdBBC304739ea014e4AfbE8b4d58963C60330DBc6",
+      "Test_usdt": "0x0b42B142087FAFcac1a1C3B90a61F86da7B64835",
+      "PancakeRouter": "0x44f8E63b00e89320f7619583502bF90597993F2F",
+      "WBNB": "0x68ED9eCB7D66f5E35BC6e0325b14f75dc55B45b4"
     },
     "78753": {
       "meta": {

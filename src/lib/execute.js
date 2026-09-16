@@ -4,7 +4,7 @@
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import registry from '../../registry.json' with { type: 'json' };
-import { evaluateProfit, minOutFromQuote } from './precheck.js';
+import { evaluateProfit, minOutFromQuote, gasWithHeadroom } from './precheck.js';
 
 const ABIS = {
   ImputePay: registry.contracts.ImputePay.abi,
@@ -167,7 +167,7 @@ export async function settleSingle({
       abi: ABIS.ImputePay,
       functionName: 'execute',
       args: [intent, intentSig, permitSig, minNativeOut],
-      gas: (gas * 120n) / 100n, // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值）
+      gas: gasWithHeadroom(gas), // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值；公式收编 Kit）
       account,
     });
     return { txHash, gas, quote, minNativeOut, verdict };
@@ -240,7 +240,7 @@ export async function settleBatch({
         items.map((it) => it.permitSig ?? '0x'),
         minNativeOuts,
       ],
-      gas: (gas * 120n) / 100n, // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值）
+      gas: gasWithHeadroom(gas), // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值；公式收编 Kit）
       account,
     });
     return { txHash, gas, totalQuote, minNativeOuts, verdict };
