@@ -18,7 +18,15 @@ for (const d of [PAY_KIT, WORKER_KIT]) {
   if (!existsSync(d)) throw new Error(`缺少 kit 源码：${d}（请在 monorepo 内运行本脚本）`);
 }
 
-rmSync(outDir, { recursive: true, force: true });
+// 重生成时保留 outDir/.git（公布仓的历史不能被发布脚本洗掉）
+if (existsSync(outDir)) {
+  for (const e of readdirSync(outDir)) {
+    if (e === '.git') continue;
+    rmSync(join(outDir, e), { recursive: true, force: true });
+  }
+} else {
+  mkdirSync(outDir, { recursive: true });
+}
 mkdirSync(join(outDir, 'src/vendor'), { recursive: true });
 
 // 1) kit 源码 vendor（pay-kit 仅依赖 viem；worker-kit 零依赖——平移即可）
