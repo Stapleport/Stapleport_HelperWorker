@@ -8,7 +8,8 @@
     "dev": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",
     "sync-registry": "node scripts/sync-registry.mjs",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "release:standalone": "node scripts/release-standalone.mjs"
   },
   "dependencies": {
     "@stapleport/pay-kit": "file:../Stapleport_Pay_kit",

@@ -123,4 +123,10 @@ L1 偏移链（Base 等）把 L1 data fee 分量计入 gasPrice 口径后公式�
 
 意图口径（schema/双签/验签/提交/回执）的正典在 [`../Stapleport_Pay_kit`](../Stapleport_Pay_kit)（2026-09-16 收编原同仓 `sdk/` TS SDK 与本仓 verify 重写而来）：`buildIntent → signPermit + signIntent → submitToHelper → waitForExecution` 四步接入，与前端 Playground、hardhat 测试同一套口径。本仓 `src/lib/verify.js` 只是它的薄适配。
 
+**双仓发布制**：本仓是正本（接 kit 正典，monorepo 内）；对外自托管分发走公开发布仓 [Stapleport/HelperWorker](https://github.com/Stapleport/HelperWorker)（public，pay-kit/worker-kit 源码 vendored、Deploy to Cloudflare 一键部署）。kit 或本仓变更后重跑发布：
+
+```bash
+npm run release:standalone   # 生成 dist/helperworker-standalone（自足可部署仓）
+```
+
 规格唯一来源：总库 `plans/pay-m1-spec.md`。
