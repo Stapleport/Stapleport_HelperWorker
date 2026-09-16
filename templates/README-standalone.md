@@ -1,4 +1,10 @@
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Stapleport/HelperWorker)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Stapleport/HelperWorker_Release)
+
+> [!WARNING]
+> **This is an auto-generated release artifact** — do not develop or open PRs here.
+> Canonical source & protocol: [Stapleport/Stapleport_HelperWorker](https://github.com/Stapleport/Stapleport_HelperWorker).
+>
+> **本仓是自动生成的发布产物**——请勿在此开发或提 PR；正本与协议口径见 [Stapleport/Stapleport_HelperWorker](https://github.com/Stapleport/Stapleport_HelperWorker)。
 
 # Stapleport HelperWorker
 

@@ -13,6 +13,7 @@ const TRIM = {
   ImputePay: [
     'execute',
     'executeBatch',
+    'fee_bps', // 平台抽成费率视图（报价按净份额口径）
     'whitelist',
     'isNonceUsed',
     'intentDigest',

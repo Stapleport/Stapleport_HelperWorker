@@ -59,6 +59,36 @@ async function swapRoute(publicClient, cfg) {
   return v;
 }
 
+// 平台抽成费率（ImputePay fee_bps，逐链 5 分钟缓存）：报价按净份额口径。
+// 旧版合约无此视图 → 按 0（无抽成），天然向后兼容
+const feeCache = new Map(); // chainKey → { at, bps }
+async function feeBpsOf(publicClient, imputepay, chainKey) {
+  const hit = feeCache.get(chainKey);
+  if (hit && Date.now() - hit.at < 300_000) return hit.bps;
+  let bps = 0n;
+  try {
+    bps = BigInt(
+      await publicClient.readContract({
+        address: imputepay,
+        abi: [
+          {
+            name: 'fee_bps',
+            type: 'function',
+            stateMutability: 'view',
+            inputs: [],
+            outputs: [{ type: 'uint16' }],
+          },
+        ],
+        functionName: 'fee_bps',
+      }),
+    );
+  } catch {
+    bps = 0n;
+  }
+  feeCache.set(chainKey, { at: Date.now(), bps });
+  return bps;
+}
+
 export async function quoteNativeOut(publicClient, route, token, amountIn) {
   const amounts = await publicClient.readContract({
     address: route.router,
@@ -145,12 +175,15 @@ export async function settleSingle({
     0n,
   ]);
   const route = await swapRoute(publicClient, cfg);
+  // 报价按净份额（合约抽走 fee_bps 后才 swap）：盈利预检与 minOut 都吃净口径
+  const bps = await feeBpsOf(publicClient, cfg.imputepay, cfg.idStr ?? String(cfg.chainId));
+  const netShare = (intent.maxHelperReward * (10000n - bps)) / 10000n;
   const { gas, gasPrice, quote, verdict } = await gasVerdict(
     publicClient,
     request,
     route,
     intent.token,
-    intent.maxHelperReward,
+    netShare,
     bufferX10,
   );
   if (!verdict.ok) {
@@ -209,13 +242,15 @@ export async function settleBatch({
     ],
   );
   const route = await swapRoute(publicClient, cfg);
-  const totalReward = items.reduce((s, it) => s + it.intent.maxHelperReward, 0n);
+  const bps = await feeBpsOf(publicClient, cfg.imputepay, cfg.idStr ?? String(cfg.chainId));
+  const netShares = items.map((it) => (it.intent.maxHelperReward * (10000n - bps)) / 10000n);
+  const totalNet = netShares.reduce((a, b) => a + b, 0n);
   const { gas, gasPrice, quote: totalQuote, verdict } = await gasVerdict(
     publicClient,
     request,
     route,
     token,
-    totalReward,
+    totalNet,
     bufferX10,
   );
   if (!verdict.ok) {
@@ -225,8 +260,8 @@ export async function settleBatch({
     );
   }
   // 逐笔 minNativeOut 按奖励份额比例分摊总折算（合约按 helperOuts ≥ 各自下限复核）
-  const minNativeOuts = items.map((it) =>
-    minOutFromQuote((totalQuote * it.intent.maxHelperReward) / totalReward, minOutBps),
+  const minNativeOuts = items.map((_, i) =>
+    minOutFromQuote((totalQuote * netShares[i]) / totalNet, minOutBps),
   );
   if (dryRun) return { dryRun: true, gas, gasPrice, totalQuote, minNativeOuts, verdict };
   try {

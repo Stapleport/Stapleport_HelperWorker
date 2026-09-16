@@ -3,7 +3,7 @@
 //   默认 outDir = <仓>/dist/helperworker-standalone
 // 产物 = 自足仓：无 monorepo 依赖（pay-kit / worker-kit 源码 vendor 进 src/vendor/），
 // 可直接 npm install && npm test && npx wrangler deploy，或 Deploy to Cloudflare 一键部署。
-// 首版/变更发布流程：跑本脚本 → 在产物目录 git init/push 到 github.com/Stapleport/HelperWorker。
+// 首版/变更发布流程：跑本脚本 → 在产物目录 git init/push 到 github.com/Stapleport/HelperWorker_Release。
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -81,4 +81,4 @@ function jsonWrite(p, obj) {
 console.log(`standalone 产物 → ${outDir}`);
 console.log('后续：cd ' + outDir);
 console.log('  npm install && npm test && npx wrangler deploy --dry-run');
-console.log('  git init -b main && git add -A && git commit && git remote add origin https://github.com/Stapleport/HelperWorker.git && git push -u origin main');
+console.log('  git init -b main && git add -A && git commit && git remote add origin https://github.com/Stapleport/HelperWorker_Release.git && git push -u origin main');
