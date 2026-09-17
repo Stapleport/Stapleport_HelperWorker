@@ -1,4 +1,7 @@
-// all.json → registry.json 裁剪核心：helper Worker 专版（与收端/付端 dapp 各持一份同源脚本）。
+// all.json → registry.json 裁剪核心：helper Worker 专版。
+// 共享骨架正典 = Stapleport_Web_kit/scripts/sync-registry-lib.mjs（syncRegistryCore，
+// 2026-09-17 收编；web 三仓的 sync-registry-core.mjs 已改成引它的选项袋薄壳）。本仓是
+// worker 侧同源变体——不引 web-kit，保留本地脚本；后续改逻辑需与正典口径对齐维护。
 // Worker 比 dapp 多两样：router 读侧（getAmountsOut/WETH，盈利预检折算用）与代币 permit 读侧。
 // 路径基于 import.meta.url 定位，与工作目录无关
 import { readFileSync, writeFileSync } from 'node:fs';

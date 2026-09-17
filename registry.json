@@ -49,6 +49,31 @@
           "anonymous": false,
           "inputs": [
             {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "intentHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "feeAmount",
+              "type": "uint256"
+            }
+          ],
+          "name": "FeeCollected",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
               "indexed": false,
               "internalType": "uint8",
               "name": "version",
@@ -359,6 +384,19 @@
           "name": "executeBatch",
           "outputs": [],
           "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "fee_bps",
+          "outputs": [
+            {
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "stateMutability": "view",
           "type": "function"
         },
         {
@@ -949,12 +987,12 @@
   "chains": {
     "31337": {
       "meta": {
-        "name": "dev",
+        "name": "localhost",
         "rpc": "http://127.0.0.1:8545",
         "explorer": null
       },
-      "ImputePay": "0xdBBC304739ea014e4AfbE8b4d58963C60330DBc6",
-      "Test_usdt": "0x0b42B142087FAFcac1a1C3B90a61F86da7B64835",
+      "ImputePay": "0x4FdB5C420952140e9Ca8e4a3db7cDAB9DC462bb4",
+      "Test_usdt": "0x8291367b28b81dc4747d898fa3047be2dc34096e",
       "PancakeRouter": "0x44f8E63b00e89320f7619583502bF90597993F2F",
       "WBNB": "0x68ED9eCB7D66f5E35BC6e0325b14f75dc55B45b4"
     },
