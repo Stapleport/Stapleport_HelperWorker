@@ -45,7 +45,7 @@ Every check mirrors an on-chain revert. **Submitting is a profitable market acti
 ### Economics
 
 - The payer signs `payeeAmount + maxHelperReward` — the helper's reward is **paid on-chain in the same transaction**, swapped to native and sent to the helper's gas wallet.
-- ImputePay charges **no platform fee**: the helper nets the full swapped reward minus its own gas. `withgas` guarantees the helper never loses (the tx reverts otherwise).
+- ImputePay charges **no platform fee**: the helper nets the full swapped reward minus its own gas. `withgas` guarantees the helper never loses (the tx reverts otherwise). The contract ships with a reserved proportional-fee mechanism (`fee_bps`, currently 0, cap 50%) — if ever activated, this Worker's profit precheck automatically switches to net-share quoting, no code changes.
 - `executeBatch` packs same-token intents into one swap to amortize gas — micro-payments become viable.
 
 ### Quick Start
@@ -155,7 +155,7 @@ MIT
 ### 经济账
 
 - 付方签的是 `payeeAmount + maxHelperReward`——helper 奖励**当笔链上直付**，换币成 native 打进 helper 的 gas 钱包。
-- ImputePay **无平台抽成**：helper 净得换币后全额减去自付 gas；`withgas` 保证 helper 永远不亏（亏则整笔 revert）。
+- ImputePay **无平台抽成**：helper 净得换币后全额减去自付 gas；`withgas` 保证 helper 永远不亏（亏则整笔 revert）。 合约已预留按奖励比例抽成机制（`fee_bps`，当前 0、上限 50%）——若将来激活，本 Worker 盈利预检自动按净份额折算，无需改代码。
 - `executeBatch` 把同代币意图打包进一次换币摊薄 gas——微支付因此可行。
 
 ### 快速开始
