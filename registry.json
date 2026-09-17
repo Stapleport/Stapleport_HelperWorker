@@ -953,10 +953,10 @@
         "rpc": "http://127.0.0.1:8545",
         "explorer": null
       },
-      "ImputePay": "0x60FB019a3C221a4d691B418Df58150569f7D6Bc4",
+      "ImputePay": "0xdBBC304739ea014e4AfbE8b4d58963C60330DBc6",
       "Test_usdt": "0x0b42B142087FAFcac1a1C3B90a61F86da7B64835",
-      "PancakeRouter": "0xcA55bB5f2d8D78756C387f51E33814562850296e",
-      "WBNB": "0xdd73c460e7576Ac6538280Ea77AF133314f74b68"
+      "PancakeRouter": "0x44f8E63b00e89320f7619583502bF90597993F2F",
+      "WBNB": "0x68ED9eCB7D66f5E35BC6e0325b14f75dc55B45b4"
     },
     "78753": {
       "meta": {
