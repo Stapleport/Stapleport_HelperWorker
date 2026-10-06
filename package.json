@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Stapleport 付端第三方 helper Worker：暴露 /intents 端口接收机器签名意图，模拟→盈利预检→代提交 execute/executeBatch；绑 KV 后低利单进队列由 cron 周期重试。意图口径走 @stapleport/pay-kit 正典（薄适配）。",
   "scripts": {
-    "dev": "wrangler dev --test-scheduled",
+    "dev": "wrangler dev --test-scheduled --port 8799 --inspector-port 9232",
     "deploy": "wrangler deploy",
     "sync-registry": "node scripts/sync-registry.mjs",
     "test": "node --test test/*.test.mjs",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@stapleport/pay-kit": "file:../Stapleport_Pay_kit",
-    "@stapleport/worker-kit": "file:../../worker/Stapleport_WorkerKit",
+    "@stapleport/worker-kit": "file:../../Stapleport_worker/Stapleport_WorkerKit",
     "viem": "^2.21.0"
   },
   "devDependencies": {
@@ -21,6 +21,6 @@
     "wrangler": "^4.0.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.0.0"
   }
 }

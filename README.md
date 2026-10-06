@@ -37,11 +37,19 @@ echo 'HELPER_PRIVATE_KEY=0x…' > .dev.vars
 wrangler secret put HELPER_PRIVATE_KEY
 ```
 
+> 生产可用前必须 `wrangler secret put HELPER_PRIVATE_KEY`——未绑则 `/healthz` 返回 helper:null，`POST /intents` 与 `/intents/batch` 两口直接 500（配置自省即验出，勿上线裸跑）。
+
 本地联调推荐直接用 hardhat 测试账户（有 10000 ETH）：
 
 ```bash
 echo 'HELPER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' > .dev.vars
 ```
+
+## 本地口与 E2E 弹药（口径）
+
+- 本地口 **8799**（`npm run dev` 钉 `--port 8799`；2026-10-02 起已入 services.conf「helper」行，随 `2_start-apps.sh` 起）。`.dev.vars` 只需 `HELPER_PRIVATE_KEY` 一键。
+- E2E 弹药（8545）：付款币只认 **MockPermitToken**（MockUSDC 是 6dp、Test_usdt 不在 ImputePay 白名单）；代币库存全在部署者 **0x99f5**（老 blob 句 idx0，经 `secrets/mnemonics.js` loadBlobSecrets 解密取钥）；mock DEX 三件套早有（`scripts/Pay/demo_e2e.js` 留下）。
+- 坑：8545 automining 下 ethers `getTransactionCount('latest')` **滞后一拍**——nonce 判断用 `pending` + 本地自增兜底。
 
 **本地 E2E 演示**（hardhat 本地链 + wrangler dev + Kit 造单，单笔全链路对账）：
 前置步骤与地址配置见 [`../Stapleport_Pay_kit/localtest/demo_e2e.mjs`](../Stapleport_Pay_kit/localtest/demo_e2e.mjs) 头注释；worker 起来后：
@@ -120,6 +128,7 @@ L1 偏移链（Base 等）把 L1 data fee 分量计入 gasPrice 口径后公式�
 - **不做订单簿/撮合**：意图直接结算，无挂单簿。
 - **不承诺成交**：出不出手由盈利预检说了算；deadline 内没人提交，意图自然作废。
 - **不解析业务**：Worker 不理解「订单」，只理解七字段意图。
+- **不做 helper 目录/市场**（模型口径，用户拍板）：只官方实例（stapleport-helper.kflc.workers.dev）+ 第三方自建自托管；无公开列表、无第三方市场，helpers.json 之类的生产发布不做。
 
 ## 协议口径正典（@stapleport/pay-kit）
 

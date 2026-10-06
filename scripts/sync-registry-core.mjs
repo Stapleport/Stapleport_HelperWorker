@@ -11,9 +11,12 @@ import { dirname, join } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 
 // Worker 不需要 Imputations/LongSystemLog（收端归集体系与它无关）
+// 2026-10-05 hub/mod 切键（P0.2 冻结）：旧 L1 单件 ImputePay 键退役；链门 = pay_hub
+// （门面正典代理键，Web_pay 同口径），全量 ABI 面 = IImputePay（聚合接口，地址 = 代理，
+// 终身不变——impl 换代 registry 自愈）。
 const TRIM = {
   Test_usdt: ['name', 'version', 'balanceOf', 'decimals', 'symbol', 'allowance', 'nonces'],
-  ImputePay: [
+  IImputePay: [
     'execute',
     'executeBatch',
     'fee_bps', // 平台抽成费率视图（报价按净份额口径）
@@ -28,7 +31,7 @@ const TRIM = {
   WBNB: ['deposit', 'withdraw', 'balanceOf', 'decimals', 'symbol'],
 };
 
-const NAMES = ['ImputePay', 'Test_usdt', 'PancakeRouter', 'WBNB'];
+const NAMES = ['pay_hub', 'IImputePay', 'Test_usdt', 'PancakeRouter', 'WBNB'];
 
 export function allJsonPath() {
   return (
@@ -52,13 +55,13 @@ export function syncRegistry({ quiet = false } = {}) {
       : src.abi;
     out.contracts[contract] = { abi };
   }
-  // 该链上部署了 ImputePay 才是付端体系的链（收端链只有 Imputations，本 Worker 用不上）
+  // 该链上部署了 pay_hub 才是付端体系的链（收端链只有 Imputations，本 Worker 用不上）
   for (const chainId of chains) {
     const addresses = Object.fromEntries(
       NAMES.map((n) => [n, all[chainId]?.[n]?.address]).filter(([, a]) => a),
     );
-    if (!addresses.ImputePay) {
-      if (!quiet) console.warn(`跳过链 ${chainId}：没有 ImputePay 地址`);
+    if (!addresses.pay_hub) {
+      if (!quiet) console.warn(`跳过链 ${chainId}：没有 pay_hub 地址`);
       continue;
     }
     const net = Object.values(all[chainId]).find(

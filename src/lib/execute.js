@@ -7,7 +7,8 @@ import registry from '../../registry.json' with { type: 'json' };
 import { evaluateProfit, minOutFromQuote, gasWithHeadroom } from './precheck.js';
 
 const ABIS = {
-  ImputePay: registry.contracts.ImputePay.abi,
+  // 2026-10-05 hub/mod 切键：registry 面 = IImputePay 全量聚合接口（地址=代理，终身不变）
+  IImputePay: registry.contracts.IImputePay.abi,
   Router: registry.contracts.PancakeRouter.abi,
 };
 
@@ -45,7 +46,7 @@ async function swapRoute(publicClient, cfg) {
   const router = (
     await publicClient.readContract({
       address: cfg.imputepay,
-      abi: ABIS.ImputePay,
+      abi: ABIS.IImputePay,
       functionName: 'pay_config',
     })
   )[1];
@@ -106,14 +107,14 @@ async function preflight(publicClient, cfg, { intent, payer }) {
   }
   const ok = await publicClient.readContract({
     address: cfg.imputepay,
-    abi: ABIS.ImputePay,
+    abi: ABIS.IImputePay,
     functionName: 'whitelist',
     args: [intent.token],
   });
   if (!ok) throw new SettleError('whitelist', '代币不在合约白名单');
   const used = await publicClient.readContract({
     address: cfg.imputepay,
-    abi: ABIS.ImputePay,
+    abi: ABIS.IImputePay,
     functionName: 'isNonceUsed',
     args: [payer, intent.nonce],
   });
@@ -126,7 +127,7 @@ async function simulate(publicClient, cfg, account, functionName, args) {
   try {
     const { request } = await publicClient.simulateContract({
       address: cfg.imputepay,
-      abi: ABIS.ImputePay,
+      abi: ABIS.IImputePay,
       functionName,
       args,
       account: account.address,
@@ -189,7 +190,7 @@ export async function settleSingle({
   if (!verdict.ok) {
     throw new SettleError(
       'profit',
-      `无利可图：奖励折算 ${verdict.expected} < 门槛 ${verdict.threshold}（gas ${verdict.gasCost} × ${bufferX10}/10）`,
+      `收益不足：奖励折算 ${verdict.expected} 低于门槛 ${verdict.threshold}（gas ${verdict.gasCost} × ${bufferX10}/10）`,
     );
   }
   const minNativeOut = minOutFromQuote(quote, minOutBps);
@@ -197,7 +198,7 @@ export async function settleSingle({
   try {
     const txHash = await walletClient.writeContract({
       address: cfg.imputepay,
-      abi: ABIS.ImputePay,
+      abi: ABIS.IImputePay,
       functionName: 'execute',
       args: [intent, intentSig, permitSig, minNativeOut],
       gas: gasWithHeadroom(gas), // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值；公式收编 Kit）
@@ -256,7 +257,7 @@ export async function settleBatch({
   if (!verdict.ok) {
     throw new SettleError(
       'profit',
-      `批量无利可图：合计折算 ${verdict.expected} < 门槛 ${verdict.threshold}（gas ${verdict.gasCost} × ${bufferX10}/10）`,
+      `批量收益不足：合计折算 ${verdict.expected} 低于门槛 ${verdict.threshold}（gas ${verdict.gasCost} × ${bufferX10}/10）`,
     );
   }
   // 逐笔 minNativeOut 按奖励份额比例分摊总折算（合约按 helperOuts ≥ 各自下限复核）
@@ -267,7 +268,7 @@ export async function settleBatch({
   try {
     const txHash = await walletClient.writeContract({
       address: cfg.imputepay,
-      abi: ABIS.ImputePay,
+      abi: ABIS.IImputePay,
       functionName: 'executeBatch',
       args: [
         items.map((it) => it.intent),

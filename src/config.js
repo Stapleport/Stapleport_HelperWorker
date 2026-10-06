@@ -6,7 +6,7 @@ export function chainConfig(env, chainId) {
   const idStr = String(chainId);
   const reg = registry.chains[idStr];
   const rpc = env[`RPC_URL_${idStr}`] || reg?.meta?.rpc;
-  const imputepay = env[`IMPUTEPAY_${idStr}`] || reg?.ImputePay;
+  const imputepay = env[`IMPUTEPAY_${idStr}`] || reg?.IImputePay;
   if (!rpc || !imputepay) return null;
   return {
     idStr,
