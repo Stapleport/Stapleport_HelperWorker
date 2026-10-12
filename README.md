@@ -47,7 +47,7 @@ echo 'HELPER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784
 
 ## 本地口与 E2E 弹药（口径）
 
-- 本地口 **8799**（`npm run dev` 钉 `--port 8799`；2026-10-02 起已入 services.conf「helper」行，随 `2_start-apps.sh` 起）。`.dev.vars` 只需 `HELPER_PRIVATE_KEY` 一键。
+- 本地口 **8790**（`npm run dev` 钉 `--port 8790`；入 services-user.conf「helper」行随 `start-user.sh` 起、agent 档「helper-agent」行随 `2_start-apps.sh` 起）。`.dev.vars` 只需 `HELPER_PRIVATE_KEY` 一键。
 - E2E 弹药（8545）：付款币只认 **MockPermitToken**（MockUSDC 是 6dp、Test_usdt 不在 ImputePay 白名单）；代币库存全在部署者 **0x99f5**（老 blob 句 idx0，经 `secrets/mnemonics.js` loadBlobSecrets 解密取钥）；mock DEX 三件套早有（`scripts/Pay/demo_e2e.js` 留下）。
 - 坑：8545 automining 下 ethers `getTransactionCount('latest')` **滞后一拍**——nonce 判断用 `pending` + 本地自增兜底。
 
@@ -140,4 +140,4 @@ L1 偏移链（Base 等）把 L1 data fee 分量计入 gasPrice 口径后公式�
 npm run release:standalone   # 生成 dist/helperworker-standalone（自足可部署仓）
 ```
 
-规格唯一来源：总库 `plans/pay-m1-spec.md`。
+规格唯一来源：总库 `plans/archive/pay-m1-spec.md`。

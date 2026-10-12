@@ -1,6 +1,6 @@
 // ImputePay helper 本地全链路 E2E：机器双签 → POST /intents → helper 验签+盈利预检 →
 // 代提交 execute() 落链 → 链上对账（余额/事件/nonce/合约残留）。
-// 前置：8545 链活（automining）、wrangler dev @8799（.dev.vars 配 helper 钥匙）、
+// 前置：8545 链活（automining）、wrangler dev @8790（.dev.vars 配 helper 钥匙）、
 //       mock DEX 池子（token/WBNB）有流动性、payer 有足够 MockPermitToken。
 // 用法：node scripts/e2e-local.mjs   （退出码 0=全对账通过）
 // 签名口径走 @stapleport/pay-kit 正典（buildIntent/signPermit/signIntent/submitToHelper）。
@@ -16,8 +16,38 @@ import {
   PAYMENT_EXECUTED,
 } from '@stapleport/pay-kit';
 
+// ── 8545 族起跑闸（口径=e2e-optimization-notes.md §6：同节点并发 e2e 会互踩账户/state）──
+// 拒跑(exit 3)：他 8545 族 e2e 在跑 / 8545 e2e 锁被占 / 本脚本 mtime 不稳（疑编辑中）。
+(() => {
+  const fs = process.getBuiltinModule("fs"), path = process.getBuiltinModule("path"), os = process.getBuiltinModule("os");
+  const SELF = path.resolve(new URL(import.meta.url).pathname);
+  const FAMILY = ["e2e-local.mjs", "demo_e2e.mjs", "onboard-e2e.mjs", "fullloop.mjs", "e2e-quote.mjs"];
+  const live = [];
+  for (const d of fs.readdirSync("/proc")) {
+    if (!/^\d+$/.test(d) || +d === process.pid) continue;
+    let exe = ""; try { exe = fs.readlinkSync(`/proc/${d}/exe`); } catch { continue; }
+    if (!/(^|\/)node$/.test(exe)) continue;
+    let cmd = ""; try { cmd = fs.readFileSync(`/proc/${d}/cmdline`, "utf8").split("\0").join(" ").trim(); } catch { continue; }
+    if (FAMILY.some((b) => cmd.includes(b)) && !cmd.includes(SELF)) live.push(`${d} ${cmd}`);
+  }
+  if (live.length) { console.error("[8545-gate] 拒跑：8545 族其他 e2e 进程在跑\n  " + live.join("\n  ")); process.exit(3); }
+  const LOCK = path.join(os.tmpdir(), "stapleport-8545-e2e.lock");
+  if (fs.existsSync(LOCK)) {
+    const pid = parseInt(fs.readFileSync(LOCK, "utf8").trim().split(/\s+/)[0], 10) || 0;
+    let held = false; try { process.kill(pid, 0); held = true; } catch {}
+    if (held) { console.error(`[8545-gate] 拒跑：8545 e2e 锁被 pid ${pid} 占用`); process.exit(3); }
+    try { fs.unlinkSync(LOCK); } catch {}
+  }
+  try { fs.writeFileSync(LOCK, `${process.pid} ${new Date().toISOString()} ${SELF}\n`, { flag: "wx" }); }
+  catch { console.error("[8545-gate] 拒跑：拿不到 8545 e2e 锁（并发起跑）"); process.exit(3); }
+  process.on("exit", () => { try { if (parseInt(fs.readFileSync(LOCK, "utf8").trim().split(/\s+/)[0], 10) === process.pid) fs.unlinkSync(LOCK); } catch {} });
+  const m1 = fs.statSync(SELF).mtimeMs;
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200);
+  if (fs.statSync(SELF).mtimeMs !== m1) { console.error("[8545-gate] 拒跑：脚本 mtime 不稳（疑正在被编辑）"); process.exit(3); }
+})();
+
 const RPC = 'http://127.0.0.1:8545';
-const HELPER_URL = 'http://127.0.0.1:8799';
+const HELPER_URL = 'http://127.0.0.1:8790';
 const CHAIN_ID = 31337n;
 const IMPUTEPAY = '0xd10b0d5Aa46554AF855803679F02186566665433';
 const TOKEN = '0x8a3C06bb0fC7959BB2048b8eCCad20b3DC6c50d3'; // MockPermitToken (MockUSDC, 6dp)

@@ -1,6 +1,6 @@
 // 意图校验 + EIP-712 验签：薄适配（Collect「薄适配留本仓」同款）。
 // 正典 2026-09-16 收编进 @stapleport/pay-kit（取代本文件此前的手写实现与 sdk/ TS 重写），
-// 规格唯一来源：总库 plans/pay-m1-spec.md。本仓签名/形状留这些别名，worker.js 与测试零改动。
+// 规格唯一来源：总库 plans/archive/pay-m1-spec.md。本仓签名/形状留这些别名，worker.js 与测试零改动。
 import {
   normalizeIntent,
   recoverPayer,
