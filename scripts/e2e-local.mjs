@@ -2,7 +2,7 @@
 // 代提交 execute() 落链 → 链上对账（余额/事件/nonce/合约残留）。
 // 前置：8545 链活（automining）、wrangler dev @8790（.dev.vars 配 helper 钥匙）、
 //       mock DEX 池子（token/WBNB）有流动性、payer 有足够 MockPermitToken。
-// 用法：node scripts/e2e-local.mjs   （退出码 0=全对账通过）
+// 用法：HELPER_TOKEN=<与 worker 一致> node scripts/e2e-local.mjs   （退出码 0=全对账通过）
 // 签名口径走 @stapleport/pay-kit 正典（buildIntent/signPermit/signIntent/submitToHelper）。
 import { createPublicClient, http, decodeEventLog, formatEther } from 'viem';
 import { mnemonicToAccount } from 'viem/accounts';
@@ -48,6 +48,14 @@ import {
 
 const RPC = 'http://127.0.0.1:8545';
 const HELPER_URL = 'http://127.0.0.1:8790';
+// L-N3 起 HelperWorker 所有 POST 必带 Authorization: Bearer（未配 HELPER_TOKEN 时 503、缺/错 401）。
+// token 从 env 读，禁写死；本地联调导出与 wrangler dev 相同的 token（见 templates/.dev.vars.example）。
+const HELPER_TOKEN = process.env.HELPER_TOKEN;
+if (!HELPER_TOKEN) {
+  console.error('[auth] 缺 HELPER_TOKEN：HelperWorker 自 L-N3 起 POST 必带 Bearer。');
+  console.error('  用法：HELPER_TOKEN=<与 worker .dev.vars 一致> node scripts/e2e-local.mjs');
+  process.exit(2);
+}
 const CHAIN_ID = 31337n;
 const IMPUTEPAY = '0xd10b0d5Aa46554AF855803679F02186566665433';
 const TOKEN = '0x8a3C06bb0fC7959BB2048b8eCCad20b3DC6c50d3'; // MockPermitToken (MockUSDC, 6dp)
@@ -122,13 +130,13 @@ async function main() {
   ]);
   console.log('[3] 基线: payee token', payeeBal0, '| payer token', payerBal0, '| helper native', formatEther(helperNat0));
 
-  // POST 给 helper（无许可代提交入口）
+  // POST 给 helper（无许可代提交入口；必带 Bearer，token 见顶部 HELPER_TOKEN）
   const ack = await submitToHelper(HELPER_URL, {
     chainId: String(CHAIN_ID),
     intent: serializeIntent(intent),
     intentSig,
     permitSig,
-  });
+  }, { token: HELPER_TOKEN });
   console.log('[4] helper 应答:', JSON.stringify(ack, null, 2));
   if (ack.status !== 'executed' || !ack.txHash) {
     throw new Error(`helper 未代提交（status=${ack.status}），中止`);

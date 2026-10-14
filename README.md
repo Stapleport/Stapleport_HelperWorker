@@ -62,10 +62,10 @@ node ../Stapleport_Pay_kit/localtest/demo_e2e.mjs   # 造单 → helper 预检/�
 
 ```bash
 npm run deploy
+# 必配防滥用：所有 POST 需 Bearer（未配时 Worker 回 503 拒绝收单）
+wrangler secret put HELPER_TOKEN
 # 可选绑定重试队列（⚠️ Stapleport 自家生产不绑——零 KV 红线/免费额度事故；此处为第三方自部署可选路径）：
 wrangler kv namespace create INTENT_QUEUE   # 把 id 填进 wrangler.jsonc 再 deploy
-# 可选防滥用：
-wrangler secret put HELPER_TOKEN            # 设置后所有 POST 需 Bearer
 ```
 
 ## API
@@ -86,6 +86,10 @@ wrangler secret put HELPER_TOKEN            # 设置后所有 POST 需 Bearer
 // 202 {"status":"queued","reason":"无利可图…"}   仅绑了 KV 时
 // 422 {"error":"simulate|profit|verify|expired|whitelist", …}
 // 409 {"error":"nonce"}（已消费，不重试）
+// 401 {"error":"unauthorized"}（缺/错 Bearer）
+// 413 {"error":"payload_too_large"}（体超 MAX_BODY_BYTES）
+// 429 {"error":"rate_limited"}（单 IP 超 RATE_LIMIT_PER_MIN，带 Retry-After）
+// 503 {"error":"helper_token_required"}（未配 HELPER_TOKEN）
 ```
 
 ### `POST /intents/batch` — 同币种批量（gas 摊薄）
@@ -106,8 +110,11 @@ wrangler secret put HELPER_TOKEN            # 设置后所有 POST 需 Bearer
 | `MIN_OUT_BPS` | `9500` | minNativeOut = 行情折算 × 95%（防三明治） |
 | `MAX_BATCH` | `10` | 单次 executeBatch 笔数上限 |
 | `DRY_RUN` | `false` | 只模拟与预检，不广播 |
-| `HELPER_TOKEN` | 空 | 可选 Bearer 共享密钥 |
+| `MAX_BODY_BYTES` | `1048576` | 单请求体字节上限，超过回 413（1MB） |
+| `RATE_LIMIT_PER_MIN` | `60` | 单源 IP 每分钟 POST 上限，超过回 429 |
 | `QUEUE_MAX_ATTEMPTS` | `5` | 重试队列放弃前最多重估次数 |
+
+`HELPER_TOKEN`（必配，非 vars）：用 `wrangler secret put HELPER_TOKEN` 注入（本地 `wrangler dev` 放 `.dev.vars`）。所有 POST 需带 `Authorization: Bearer <token>`；未配置时 Worker 对所有 POST 回 `503 helper_token_required` 并在首个请求打一次告警。限速为隔离实例内尽力而为（Workers 多实例不共享内存）。
 
 ## 盈利模型
 

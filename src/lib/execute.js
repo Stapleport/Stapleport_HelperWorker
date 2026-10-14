@@ -17,7 +17,7 @@ const ABIS = {
 //   expired/nonce/whitelist 链上状态不满足（不进队列——重试也不会变）
 //   simulate       合约会 revert（不进队列）
 //   profit         现在没利可图（可进队列等行情）
-//   send           广播失败（可进队列）
+//   send           广播失败（不重试，直接 502）
 export class SettleError extends Error {
   constructor(kind, message) {
     super(message);
@@ -170,10 +170,7 @@ export async function settleSingle({
   const { publicClient, walletClient } = clients(cfg, account);
   await preflight(publicClient, cfg, { intent, payer });
   const request = await simulate(publicClient, cfg, account, 'execute', [
-    intent,
-    intentSig,
-    permitSig,
-    0n,
+    { intent, intentSig, permitSig, minNativeOut: 0n },
   ]);
   const route = await swapRoute(publicClient, cfg);
   // 报价按净份额（合约抽走 fee_bps 后才 swap）：盈利预检与 minOut 都吃净口径
@@ -200,7 +197,7 @@ export async function settleSingle({
       address: cfg.imputepay,
       abi: ABIS.IImputePay,
       functionName: 'execute',
-      args: [intent, intentSig, permitSig, minNativeOut],
+      args: [{ intent, intentSig, permitSig, minNativeOut }],
       gas: gasWithHeadroom(gas), // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值；公式收编 Kit）
       account,
     });
@@ -236,10 +233,12 @@ export async function settleBatch({
     account,
     'executeBatch',
     [
-      items.map((it) => it.intent),
-      items.map((it) => it.intentSig),
-      items.map((it) => it.permitSig ?? '0x'),
-      items.map(() => 0n),
+      items.map((it) => ({
+        intent: it.intent,
+        intentSig: it.intentSig,
+        permitSig: it.permitSig ?? '0x',
+        minNativeOut: 0n,
+      })),
     ],
   );
   const route = await swapRoute(publicClient, cfg);
@@ -271,10 +270,12 @@ export async function settleBatch({
       abi: ABIS.IImputePay,
       functionName: 'executeBatch',
       args: [
-        items.map((it) => it.intent),
-        items.map((it) => it.intentSig),
-        items.map((it) => it.permitSig ?? '0x'),
-        minNativeOuts,
+        items.map((it, i) => ({
+          intent: it.intent,
+          intentSig: it.intentSig,
+          permitSig: it.permitSig ?? '0x',
+          minNativeOut: minNativeOuts[i],
+        })),
       ],
       gas: gasWithHeadroom(gas), // 预估值零余量会被 OOG 裸回滚，+20% 上限（预检口径仍用原值；公式收编 Kit）
       account,

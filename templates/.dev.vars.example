@@ -1,3 +1,6 @@
 # 仅限本地 31337 开发链的公开测试私钥（hardhat well-known #0）。
 # ⚠️ 此钥全网皆知，只能配本地测试链——任何真实资产环境都必须换新钥并走 wrangler secret put。
 HELPER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+# 防滥用必配项（F-007）：本地联调同样生效，所有 POST 需带 Authorization: Bearer <token>；
+# 未配置时 Worker 对所有 POST 回 503。生产请改用 wrangler secret put HELPER_TOKEN。
+HELPER_TOKEN=dev-local-token

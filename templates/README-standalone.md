@@ -73,9 +73,12 @@ Then point machines at `https://<your-worker>.workers.dev/intents`.
 | `MIN_OUT_BPS` | `9500` | swap slippage floor, basis points (anti-sandwich) |
 | `MAX_BATCH` | `10` | max intents per executeBatch |
 | `DRY_RUN` | — | set to simulate only; responses return `status:"dry-run"` |
-| `HELPER_TOKEN` | — | optional Bearer token to keep scanners off your endpoint |
+| `MAX_BODY_BYTES` | `1048576` | max request body size, over → 413 (1MB) |
+| `RATE_LIMIT_PER_MIN` | `60` | max POSTs per source IP per minute, over → 429 |
 | `QUEUE_MAX_ATTEMPTS` | `5` | retry attempts for the KV queue |
 | `HELPER_PRIVATE_KEY` | secret | **gas-only wallet** — never holds user funds |
+
+`HELPER_TOKEN` (required, a secret not a var): set with `wrangler secret put HELPER_TOKEN` (local `wrangler dev` reads `.dev.vars`). Every POST must carry `Authorization: Bearer <token>`; an unset token makes the worker return `503 helper_token_required` for all POSTs. The IP rate limit is per-isolate best effort (Workers instances do not share memory).
 
 Optional KV queue (`INTENT_QUEUE`): unprofitable intents get queued and re-quoted by cron instead of rejected. Off = reject immediately (422).
 
@@ -93,7 +96,7 @@ Payment history for any chain — official or self-hosted — is queryable strai
 
 - The helper wallet is **gas-only**. It cannot touch user funds: the contract moves tokens from payer to payee directly; the helper only receives its signed reward.
 - Keep `HELPER_PRIVATE_KEY` in Worker secrets, never in `vars/` or git.
-- `HELPER_TOKEN` (optional) protects your endpoint from third-party traffic; it is not an auth wall for the protocol — anyone may submit the same signature themselves.
+- `HELPER_TOKEN` (required) keeps third-party traffic off your endpoint; it is not an auth wall for the protocol — anyone may submit the same signature themselves. Layered with a request-body cap and per-IP rate limit.
 
 ### Local development
 
@@ -183,9 +186,12 @@ npx wrangler deploy
 | `MIN_OUT_BPS` | `9500` | 换币滑点下限（基点，防三明治） |
 | `MAX_BATCH` | `10` | executeBatch 单批上限 |
 | `DRY_RUN` | — | 设定后只模拟不广播，应答 `status:"dry-run"` |
-| `HELPER_TOKEN` | — | 可选 Bearer 令牌，防端口被扫描 |
+| `MAX_BODY_BYTES` | `1048576` | 单请求体字节上限，超过回 413（1MB） |
+| `RATE_LIMIT_PER_MIN` | `60` | 单源 IP 每分钟 POST 上限，超过回 429 |
 | `QUEUE_MAX_ATTEMPTS` | `5` | KV 队列重试次数 |
 | `HELPER_PRIVATE_KEY` | secret | **只放 gas 的钱包**——永不持有用户资金 |
+
+`HELPER_TOKEN`（必配，属 secret 非 var）：用 `wrangler secret put HELPER_TOKEN` 注入（本地 `wrangler dev` 读 `.dev.vars`）。所有 POST 需带 `Authorization: Bearer <token>`；未配置时 Worker 对所有 POST 回 `503 helper_token_required`。按 IP 限速为隔离实例内尽力而为（Workers 多实例不共享内存）。
 
 可选 KV 队列（`INTENT_QUEUE`）：低利单入队、cron 周期重估，不绑则直接 422 拒单。
 
@@ -203,7 +209,7 @@ npx wrangler versions upload --var RPC_URL_31338:http://你的-rpc --var IMPUTEP
 
 - helper 钱包**只放 gas**。合约把代币从付方直付收款方，helper 只收签名里写死的奖励——它没有能力触碰用户资金。
 - `HELPER_PRIVATE_KEY` 只进 Worker secrets，绝不进 `vars/` 或 git。
-- `HELPER_TOKEN`（可选）用于挡第三方扫描；它不是协议的鉴权墙——任何人本来就可以自己提交同一份签名。
+- `HELPER_TOKEN`（必配）用于挡第三方扫描；它不是协议的鉴权墙——任何人本来就可以自己提交同一份签名。另叠请求体上限与按 IP 限速。
 
 ### 本地开发
 

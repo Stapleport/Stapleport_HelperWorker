@@ -6,7 +6,8 @@
 
   // 公网面就是业务本身：机器 POST 签名意图进来（与收端 Executor 的零公网面相反，
   // 这个 Worker 的存在意义就是「暴露端口」——无许可 helper 的代提交入口）。
-  // 可选防滥用：设 HELPER_TOKEN 后要求 Authorization: Bearer <token>。
+  // 防滥用（F-007）：HELPER_TOKEN 必配（`wrangler secret put HELPER_TOKEN` 注入，勿写此文件）；
+  // 另叠请求体上限与按 IP 限速（见 vars）。未配 HELPER_TOKEN 时所有 POST 回 503。
 
   // cron 只服务重试队列：没绑 KV 时队列恒空，每分钟空转一次成本可忽略
   "triggers": {
@@ -29,8 +30,13 @@
     // ---- 行为 ----
     // true = 只模拟与预检，不广播（本地联调/巡检用）
     "DRY_RUN": "false",
-    // 可选：设置后所有 POST 需带 Authorization: Bearer <token>（防端口被扫）
-    "HELPER_TOKEN": "",
+    // ---- 防滥用（F-007）----
+    // 单请求体字节上限，超过回 413（默认 1MB）
+    "MAX_BODY_BYTES": "1048576",
+    // 单源 IP 每分钟 POST 上限，超过回 429（默认 60）
+    "RATE_LIMIT_PER_MIN": "60",
+    // HELPER_TOKEN 必配但不在此声明：用 `wrangler secret put HELPER_TOKEN`
+    // （本地 `wrangler dev` 放 .dev.vars）。未配时 Worker 对所有 POST 回 503。
     // 重试队列最多重试几次后放弃（需绑定下面的 KV 才有队列）
     "QUEUE_MAX_ATTEMPTS": "5"
   }
