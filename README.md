@@ -147,4 +147,4 @@ L1 偏移链（Base 等）把 L1 data fee 分量计入 gasPrice 口径后公式�
 npm run release:standalone   # 生成 dist/helperworker-standalone（自足可部署仓）
 ```
 
-规格唯一来源：总库 `plans/archive/pay-m1-spec.md`。
+规格唯一来源：总库 `docs/plans/archive/pay-m1-spec.md`。
