@@ -66,7 +66,7 @@ Then point machines at `https://<your-worker>.workers.dev/intents`.
 
 | var | default | notes |
 | --- | --- | --- |
-| `CHAIN_IDS` | `78753,31337` | chains this helper serves |
+| `CHAIN_IDS` | `78753,31337` | chains this helper serves (78753 retired from the local stack 2026-10-14) |
 | `RPC_URL_<id>` | registry | per-chain RPC override (use your own node) |
 | `IMPUTEPAY_<id>` | registry | per-chain ImputePay address override (self-deployed instances) |
 | `GAS_BUFFER_X10` | `12` | profit precheck buffer ×10 (1.2 = ×12) |
@@ -87,7 +87,7 @@ Optional KV queue (`INTENT_QUEUE`): unprofitable intents get queued and re-quote
 Official chains ship with the bundled `registry.json` (addresses + RPC). For your own chain, deploy ImputePay with the [hardhat scripts](https://github.com/Stapleport/Stapleport) (or reuse an existing instance), then override per-chain env:
 
 ```bash
-npx wrangler versions upload --var RPC_URL_31338:http://your-rpc --var IMPUTEPAY_31338:0xYourInstance --var CHAIN_IDS:78753,31338
+npx wrangler versions upload --var RPC_URL_31338:http://your-rpc --var IMPUTEPAY_31338:0xYourInstance --var CHAIN_IDS:31339,31338
 ```
 
 Payment history for any chain — official or self-hosted — is queryable straight from the chain via the [Pay dapp](https://stapleport-web-pay.pages.dev) (add the chain under Chain management).
@@ -179,7 +179,7 @@ npx wrangler deploy
 
 | var | 默认 | 说明 |
 | --- | --- | --- |
-| `CHAIN_IDS` | `78753,31337` | 本 helper 服务的链 |
+| `CHAIN_IDS` | `78753,31337` | 本 helper 服务的链（78753 已于 2026-10-14 从本地栈退役） |
 | `RPC_URL_<id>` | registry | 逐链 RPC 覆盖（建议用自己的节点） |
 | `IMPUTEPAY_<id>` | registry | 逐链 ImputePay 地址覆盖（自部署实例） |
 | `GAS_BUFFER_X10` | `12` | 盈利预检缓冲 ×10（1.2 = ×12） |
@@ -200,7 +200,7 @@ npx wrangler deploy
 官方链内置 `registry.json`（地址 + RPC，随包发布，不依赖任何服务在线）。自有链用 [hardhat 脚本](https://github.com/Stapleport/Stapleport)部署 ImputePay（或复用已有实例），再逐链覆盖 env：
 
 ```bash
-npx wrangler versions upload --var RPC_URL_31338:http://你的-rpc --var IMPUTEPAY_31338:0x你的实例 --var CHAIN_IDS:78753,31338
+npx wrangler versions upload --var RPC_URL_31338:http://你的-rpc --var IMPUTEPAY_31338:0x你的实例 --var CHAIN_IDS:31339,31338
 ```
 
 任何链的支付流水——官方或自托管——都可以在[付端 dapp](https://stapleport-web-pay.pages.dev) 直接查链（链管理里加一条自建链即可），无需经过任何服务。

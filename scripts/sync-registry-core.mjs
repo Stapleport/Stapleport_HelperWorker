@@ -33,6 +33,11 @@ const TRIM = {
 
 const NAMES = ['pay_hub', 'IImputePay', 'Test_usdt', 'PancakeRouter', 'WBNB'];
 
+// 本地链面收窄（2026-10-14）：本仓不引 web-kit（见头注），故与 Kit 正典常量
+// LOCAL_STEADY_CHAINS 同值本地声明——注册表只收 hub 31339 + spoke 31338；
+// all.json 里 31337 等桶留档不收录。改口径须与 Kit 常量同步维护。
+const LOCAL_STEADY_CHAINS = [31338, 31339];
+
 export function allJsonPath() {
   return (
     process.env.HARDHAT_ALL_JSON ??
@@ -57,6 +62,10 @@ export function syncRegistry({ quiet = false } = {}) {
   }
   // 该链上部署了 pay_hub 才是付端体系的链（收端链只有 Imputations，本 Worker 用不上）
   for (const chainId of chains) {
+    if (!LOCAL_STEADY_CHAINS.map(String).includes(String(chainId))) {
+      if (!quiet) console.warn(`跳过链 ${chainId}：不在 LOCAL_STEADY_CHAINS 白名单（本地链面收窄）`);
+      continue;
+    }
     const addresses = Object.fromEntries(
       NAMES.map((n) => [n, all[chainId]?.[n]?.address]).filter(([, a]) => a),
     );

@@ -1990,18 +1990,6 @@
     }
   },
   "chains": {
-    "31337": {
-      "meta": {
-        "name": "localhost",
-        "rpc": "http://127.0.0.1:8545",
-        "explorer": null
-      },
-      "pay_hub": "0x19f21526E736aB0a3faca72423f21ea7C6df084D",
-      "IImputePay": "0x19f21526E736aB0a3faca72423f21ea7C6df084D",
-      "Test_usdt": "0xd1728AbE5467563795eDD1903dc0Cb09D19c6e17",
-      "PancakeRouter": "0xF310cE606B6e124b67aD9e3462ff97164F42274C",
-      "WBNB": "0x4Be7e72e14B89107AA6E4308FD69aB8513943cB2"
-    },
     "31339": {
       "meta": {
         "name": "node31339",
@@ -2011,15 +1999,6 @@
       "pay_hub": "0x7E4a855efEe3cFc202083CA39237141eE491De9F",
       "IImputePay": "0x7E4a855efEe3cFc202083CA39237141eE491De9F",
       "Test_usdt": "0x6687915C238E4261e5B56fc5A5E361ffAAF25870"
-    },
-    "78756": {
-      "meta": {
-        "name": "stapletest",
-        "rpc": "https://rpc-test.stapleport.com",
-        "explorer": null
-      },
-      "pay_hub": "0x10FCf3E039e299604854dD41Ab1a28aFBED4D6f1",
-      "IImputePay": "0x10FCf3E039e299604854dD41Ab1a28aFBED4D6f1"
     }
   }
 }

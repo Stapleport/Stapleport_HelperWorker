@@ -73,7 +73,7 @@ wrangler kv namespace create INTENT_QUEUE   # 把 id 填进 wrangler.jsonc 再 d
 ### `POST /intents` — 单笔
 
 ```jsonc
-// 请求（bigint 一律字符串）
+// 请求（bigint 一律字符串）——注：示例链号 78753 已于 2026-10-14 从本地栈退役，实际填所在链（本地栈=31339）
 {
   "chainId": "78753",
   "intent": { "payee": "0x…", "payeeAmount": "1000000", "token": "0x…",
