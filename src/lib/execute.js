@@ -9,7 +9,7 @@ import { evaluateProfit, minOutFromQuote, gasWithHeadroom } from './precheck.js'
 const ABIS = {
   // 2026-10-05 hub/mod 切键：registry 面 = IImputePay 全量聚合接口（地址=代理，终身不变）
   IImputePay: registry.contracts.IImputePay.abi,
-  Router: registry.contracts.PancakeRouter.abi,
+  Router: registry.contracts.SwapRouter.abi,
 };
 
 // kind 语义（路由层映射）：
