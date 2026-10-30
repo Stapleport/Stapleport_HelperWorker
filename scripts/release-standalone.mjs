@@ -13,7 +13,7 @@ const root = resolve(here, '..');
 const outDir = resolve(process.argv[2] ?? join(root, 'dist', 'helperworker-standalone'));
 
 const PAY_KIT = resolve(root, '../Stapleport_Pay_kit');
-const WORKER_KIT = resolve(root, '../../worker/Stapleport_WorkerKit');
+const WORKER_KIT = resolve(root, '../../Stapleport_worker/Stapleport_WorkerKit');
 for (const d of [PAY_KIT, WORKER_KIT]) {
   if (!existsSync(d)) throw new Error(`缺少 kit 源码：${d}（请在 monorepo 内运行本脚本）`);
 }

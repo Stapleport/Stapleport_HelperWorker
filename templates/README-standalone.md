@@ -90,7 +90,7 @@ Official chains ship with the bundled `registry.json` (addresses + RPC). For you
 npx wrangler versions upload --var RPC_URL_31338:http://your-rpc --var IMPUTEPAY_31338:0xYourInstance --var CHAIN_IDS:31339,31338
 ```
 
-Payment history for any chain — official or self-hosted — is queryable straight from the chain via the [Pay dapp](https://stapleport-web-pay.pages.dev) (add the chain under Chain management).
+Payment history for any chain — official or self-hosted — is queryable straight from the chain via the [Pay dapp](https://pay.stapleport.com) (add the chain under Chain management).
 
 ### Security notes
 
@@ -203,7 +203,7 @@ npx wrangler deploy
 npx wrangler versions upload --var RPC_URL_31338:http://你的-rpc --var IMPUTEPAY_31338:0x你的实例 --var CHAIN_IDS:31339,31338
 ```
 
-任何链的支付流水——官方或自托管——都可以在[付端 dapp](https://stapleport-web-pay.pages.dev) 直接查链（链管理里加一条自建链即可），无需经过任何服务。
+任何链的支付流水——官方或自托管——都可以在[付端 dapp](https://pay.stapleport.com) 直接查链（链管理里加一条自建链即可），无需经过任何服务。
 
 ### 安全须知
 
