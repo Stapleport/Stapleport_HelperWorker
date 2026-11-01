@@ -1,5 +1,7 @@
 // 入口路由：POST /intents（单笔）| POST /intents/batch（同币种批量）| GET /healthz。
-// scheduled：drain 重试队列（绑了 KV 才有内容），有利可图的单子趁行情代提交。
+// 周期触发：Stapleport_Scheduler（全生态统一调度器）经 service binding 唤醒
+// POST /internal/tick（60s 一轮），drain 重试队列（绑了 KV 才有内容），
+// 有利可图的单子趁行情代提交；本仓零自有 cron（账号 cron 名额收敛）。
 // 角色语义：调用方是「机器」（签完即可下线），本 Worker 是无许可 helper 之一——
 // 换任何 helper 都能提交同一份签名，这正是意图协议的无许可意义。
 import { listChains, chainNames } from './config.js';
@@ -253,9 +255,37 @@ async function drainQueue(env) {
   if (results.length) console.log('[queue]', JSON.stringify(results));
 }
 
+// 最近一轮摘要（isolate 内存；GET /internal/tick 只读查询用）
+let lastRun = null;
+
+// 共用执行体：scheduled（仅 wrangler dev --test-scheduled 便利）与 /internal/tick 同源；
+// 生产触发=调度器唤醒，drainQueue 本体零改动。
+export async function runTick(env) {
+  await drainQueue(env);
+  lastRun = { at: Date.now(), executed: true };
+  return lastRun;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // 内部 tick 口（调度器 service binding 唤醒，binding-only）：POST=执行一轮 runTick
+    // 返回执行摘要；GET=last_run 只读。独立于公网收单面（不走 HELPER_TOKEN/限速）。
+    if (url.pathname === '/internal/tick') {
+      const expected = env.INTERNAL_TICK_TOKEN ?? '';
+      if (!expected || request.headers.get('x-internal-token') !== expected) {
+        return json({ error: 'unauthorized' }, 401);
+      }
+      if (request.method === 'GET') return json({ ok: true, last_run: lastRun });
+      if (request.method !== 'POST') return json({ error: 'not found' }, 404);
+      const summary = await runTick(env).catch((e) => {
+        console.error('[helper] tick 异常', e);
+        return { executed: false, error: 'tick_failed' };
+      });
+      return json({ ok: true, ...summary });
+    }
+
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
 
     if (url.pathname === '/healthz' && request.method === 'GET') {
@@ -320,7 +350,7 @@ export default {
     }
   },
 
-  async scheduled(controller, env) {
-    await drainQueue(env);
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(runTick(env).catch((e) => console.error('[helper] tick 异常', e)));
   },
 };

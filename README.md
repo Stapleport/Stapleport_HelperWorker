@@ -10,7 +10,7 @@
   │                                     │ eth_call 全流程模拟               │
   │                                     │ 盈利预检：奖励折算 ≥ gas × 1.2    │
   │  ◀─ 200 executed / 202 queued ──────┤ execute / executeBatch 广播 ─────▶│
-  │                                     │ （绑 KV 后）202 单 cron 重估行情  │
+  │                                     │ （绑 KV 后）202 单 tick 重估行情  │
 ```
 
 > 上图「绑 KV 后」= 第三方自部署可选路径；Stapleport 自家生产零 KV（红线，CF KV 免费额度事故），不绑时暂不可利单直接 422 拒单。
@@ -24,7 +24,7 @@
 ```bash
 npm install
 npm run sync-registry   # 从 hardhat deployments/all.json 同步链与合约地址 → registry.json
-npm test                # 12 例：验签/形状/盈利数学/批量分组
+npm test                # 16 例：验签/形状/盈利数学/批量分组/tick 口
 npm run dev             # 本地 wrangler dev（需先配 .dev.vars，见下）
 ```
 
@@ -64,9 +64,13 @@ node ../Stapleport_Pay_kit/localtest/demo_e2e.mjs   # 造单 → helper 预检/�
 npm run deploy
 # 必配防滥用：所有 POST 需 Bearer（未配时 Worker 回 503 拒绝收单）
 wrangler secret put HELPER_TOKEN
+# 必配内部 tick 口令（调度器唤醒用；本地 wrangler dev 放 .dev.vars）
+wrangler secret put INTERNAL_TICK_TOKEN
 # 可选绑定重试队列（⚠️ Stapleport 自家生产不绑——零 KV 红线/免费额度事故；此处为第三方自部署可选路径）：
 wrangler kv namespace create INTENT_QUEUE   # 把 id 填进 wrangler.jsonc 再 deploy
 ```
+
+**触发口径（cron 已退役）**：本仓零自有 cron，周期触发源=全生态统一调度器 Stapleport_Scheduler——service binding 每 **60s** 唤醒 `POST /internal/tick`（URL 形如 `https://<binding>.internal/internal/tick`，路径必须 `/internal/tick`），请求头 `x-internal-token` 与 secret `INTERNAL_TICK_TOKEN` 比对：POST=执行一轮重试队列 drain 并返回执行摘要；GET=last_run 只读（isolate 内存态）；token 不符 401、其余路径 404。`scheduled` handler 仅为 `wrangler dev --test-scheduled` 便利保留，生产永不触发（部署序列=调度器先上，旧版被唤得 404 无害）。
 
 ## API
 
@@ -94,7 +98,7 @@ wrangler kv namespace create INTENT_QUEUE   # 把 id 填进 wrangler.jsonc 再 d
 
 ### `POST /intents/batch` — 同币种批量（gas 摊薄）
 
-`items: [{intent, intentSig, permitSig?}, …]`，其余同上；内部按币种分组切块（≤ `MAX_BATCH`）后走 `executeBatch`。盈利不过整批进队列，cron 原样重放整批。
+`items: [{intent, intentSig, permitSig?}, …]`，其余同上；内部按币种分组切块（≤ `MAX_BATCH`）后走 `executeBatch`。盈利不过整批进队列，tick 原样重放整批。
 
 ### `GET /healthz` — 配置自省
 
@@ -135,7 +139,7 @@ L1 偏移链（Base 等）把 L1 data fee 分量计入 gasPrice 口径后公式�
 - **不做订单簿/撮合**：意图直接结算，无挂单簿。
 - **不承诺成交**：出不出手由盈利预检说了算；deadline 内没人提交，意图自然作废。
 - **不解析业务**：Worker 不理解「订单」，只理解七字段意图。
-- **不做 helper 目录/市场**（模型口径，用户拍板）：只官方实例（stapleport-helper.kflc.workers.dev）+ 第三方自建自托管；无公开列表、无第三方市场，helpers.json 之类的生产发布不做。
+- **不做 helper 目录/市场**（模型口径，用户拍板）：只官方实例（helper.stapleport.com）+ 第三方自建自托管；无公开列表、无第三方市场，helpers.json 之类的生产发布不做。
 
 ## 协议口径正典（@stapleport/pay-kit）
 

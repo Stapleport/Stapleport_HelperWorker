@@ -4,15 +4,24 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-08-01",
 
+  // 显式空集=声明删远端旧 cron trigger；勿改回无字段（=未声明不删，残留双跑）。调度器统一调度后本服务不再自持 cron。
+  "triggers": { "crons": [] },
+
+  // 主入口=自定义域 helper.stapleport.com（zone 级边缘防护，参照 worker-rpc 先例）；
+  // workers_dev 显式 true（坑：挂 routes 的部署不显式写会默认关 workers.dev 腿，
+  // 2026-10-30 实测）。旧腿过渡保留至前端/文档全量切换，之后收。
+  "workers_dev": false,
+  "routes": [{ "pattern": "helper.stapleport.com", "custom_domain": true }],
+
   // 公网面就是业务本身：机器 POST 签名意图进来（与收端 Executor 的零公网面相反，
   // 这个 Worker 的存在意义就是「暴露端口」——无许可 helper 的代提交入口）。
   // 防滥用（F-007）：HELPER_TOKEN 必配（`wrangler secret put HELPER_TOKEN` 注入，勿写此文件）；
   // 另叠请求体上限与按 IP 限速（见 vars）。未配 HELPER_TOKEN 时所有 POST 回 503。
 
-  // cron 只服务重试队列：没绑 KV 时队列恒空，每分钟空转一次成本可忽略
-  "triggers": {
-    "crons": ["*/1 * * * *"]
-  },
+  // 触发源=Stapleport_Scheduler（全生态统一调度器，账号定时触发名额收敛）：service binding
+  // 每 60s 唤醒 POST /internal/tick（x-internal-token=INTERNAL_TICK_TOKEN，secret 注入，
+  // 本地放 .dev.vars）。本仓零自有定时触发；scheduled handler 仅为 dev --test-scheduled 便利保留。
+  // 没绑 KV 时重试队列恒空，每轮空转一次成本可忽略。
 
   "vars": {
     // ---- 链与合约（逗号分隔 chainId；默认读 registry.json 全部链，
@@ -43,7 +52,7 @@
 
   // ⚠️ Stapleport 自家生产不绑（零 KV 红线，免费额度事故）；不绑时 422 拒单；此处为第三方自部署可选路径。
   // ---- 可选：重试队列 KV（不绑 = 纯无状态，暂不可利单直接 422 拒绝）----
-  // 绑定后：盈利预检不过的单子 202 暂存，cron 每分钟重估行情，有利可图立即代提交。
+  // 绑定后：盈利预检不过的单子 202 暂存，tick 每分钟重估行情，有利可图立即代提交。
   // `wrangler kv namespace create INTENT_QUEUE` 把返回的 id 填进来再 deploy：
   // "kv_namespaces": [
   //   { "binding": "INTENT_QUEUE", "id": "<wrangler kv namespace create INTENT_QUEUE 返回的 id>" }
